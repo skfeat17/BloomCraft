@@ -10,6 +10,11 @@ app.get("/", (req, res) => {
   res.status(200).json({message:"Api is Running Successfully"});
 });
 
+
+
+
+
+
 // MongoDB connection
 const connectDB = async () => {
   try {

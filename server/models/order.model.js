@@ -10,51 +10,13 @@ const orderSchema = new mongoose.Schema(
 
     items: [
       {
-        productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" }
+        productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
       },
     ],
-
     shippingDetails: {
-      firstName: {
-        type: String,
-        required: true,
-      },
-      lastName: {
-        type: String,
-        required: true,
-      },
-      houseNo: {
-        type: String,
-        required: true,
-      },
-      street: {
-        type: String,
-        required: true,
-      },
-      landmark: {
-        type: String,
-      },
-      address: { type: String, required: true },
-      state: {
-        type: String,
-        required: true,
-      },
-      city: {
-        type: String,
-        required: true,
-      },
-      pincode: {
-        type: String,
-        required: true,
-      },
-      phone: {
-        type: String,
-        required: true,
-      },
-      paymentOption: {
-        type: String,
-        required: true,
-      },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ShippingDetails",
+      required: true,
     },
 
     totalAmount: {
@@ -67,10 +29,10 @@ const orderSchema = new mongoose.Schema(
       enum: ["Pending", "Paid", "Failed"],
       default: "Pending",
     },
-
+   
     orderStatus: {
       type: String,
-      enum: ["Processing", "Shipped", "Delivered", "Cancelled"],
+      enum: ["Processing","Ordered", "Shipped", "Delivered", "Cancelled"],
       default: "Processing",
     },
   },

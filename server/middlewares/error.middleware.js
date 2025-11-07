@@ -1,3 +1,4 @@
+import { errorMonitor } from "events";
 import { ApiError } from "../utils/ApiError.js";
 
 export const errorHandler = (err, req, res, next) => {

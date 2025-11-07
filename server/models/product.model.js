@@ -18,26 +18,15 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
 
-    imageUrl: [
+    images: [
       {
         type: String,
         required: true,
       },
     ],
-
-    stock: {
-      type: Number,
-      default: 1,
-    },
-
     category: {
       type: String,
       default: "Flowers",
-    },
-
-    publishedAt: {
-      type: Date,
-      default: Date.now,
     },
   },
   { timestamps: true }
