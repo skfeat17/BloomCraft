@@ -8,13 +8,13 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 /* ---------------------------- CREATE ORDER ---------------------------- */
 export const createOrder = asyncHandler(async (req, res) => {
-  const { items, shippingDetails, totalAmount } = req.body;
+  const { items, shippingDetails } = req.body;
 
   if (!items || items.length === 0) {
     throw new ApiError(400, "Order must contain at least one item");
   }
-  if (!shippingDetails || !totalAmount) {
-    throw new ApiError(400, "Shipping details and total amount are required");
+  if (!shippingDetails ) {
+    throw new ApiError(400, "Shipping details is required");
   }
 
   // Validate shipping details
@@ -23,13 +23,14 @@ export const createOrder = asyncHandler(async (req, res) => {
   if (!shipping) {
     throw new ApiError(404, "Shipping details not found");
   }
-
-  // Validate each product
+let totalAmount = 0;
   for (const item of items) {
     const product = await Product.findById(item.productId);
     if (!product) {
       throw new ApiError(404, `Product not found: ${item.productId}`);
     }
+    totalAmount += product.price * (item.quantity || 1);
+
   }
 
   // Create order
@@ -55,7 +56,7 @@ export const getUserOrders = asyncHandler(async (req, res) => {
 
   res
     .status(200)
-    .json(new ApiResponse(200, orders, "Orders fetched successfully"));
+    .json(new ApiResponse(200, {totalOrders:orders.length,orders}, "Orders fetched successfully"));
 });
 
 /* ---------------------------- GET ONE ORDER ---------------------------- */

@@ -15,7 +15,7 @@ const orderSchema = new mongoose.Schema(
     ],
     shippingDetails: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "ShippingDetails",
+      ref: "ShippingDetail",
       required: true,
     },
 

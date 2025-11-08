@@ -4,7 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
-
+import ShippingDetails from "../models/shippingDetail.model.js";
 /* ---------------------------- UPDATE ORDER STATUS (ADMIN) ---------------------------- */
 export const updateOrderStatus = asyncHandler(async (req, res) => {
   const { id } = req.params;

@@ -16,7 +16,7 @@ const router = express.Router();
 // ⚡ All routes are protected and only for Admin
 router.use(authenticate);
 router.use(adminAuth);
-
+//TODO: MAKE ROUTES ON POST MAN FOR THEM
 // ------------------------ ORDERS ------------------------
 
 // Update order status

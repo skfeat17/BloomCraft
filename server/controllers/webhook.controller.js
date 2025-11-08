@@ -1,8 +1,11 @@
 import Stripe from "stripe";
 import Order from "../models/order.model.js";
 import Payment from "../models/payment.model.js";
+import User from "../models/user.model.js";
+import ShippingDetails from "../models/shippingDetail.model.js";
 import dotenv from "dotenv";
 import path from "path";
+import { sendOrderConfirmationEmail } from "../utils/sendOrderEmail.js";
 // Load environment variables
 dotenv.config({
   path: path.resolve("../.env"),
@@ -39,7 +42,18 @@ export const handleStripeWebhook = async (req, res) => {
         );
 
         // Update order
-        const order = await Order.findById(session.metadata.orderId);
+          const order = await Order.findById(session.metadata.orderId)
+            .populate("items.productId", "title price images")
+            .populate("shippingDetails");
+        const user = await User.findById(session.metadata.userId);
+        const shipping = await ShippingDetails.findById(order.shippingDetails);
+        await sendOrderConfirmationEmail({
+          to: user.email,
+          user,
+          order,
+          shipping,
+        });
+
         if (order) {
           order.paymentStatus = "Paid";
           order.orderStatus = "Ordered";
@@ -70,7 +84,7 @@ export const handleStripeWebhook = async (req, res) => {
     case "payment_intent.payment_failed": {
       const intent = event.data.object;
       const metadata = intent.metadata || {};
-      console.log("Payment Error",intent.last_payment_error.message)
+      console.log("Payment Error", intent.last_payment_error.message);
       try {
         // Create failed payment record
         await Payment.create({
