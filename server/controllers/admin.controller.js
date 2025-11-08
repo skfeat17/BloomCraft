@@ -1,3 +1,5 @@
+import Payment from "../models/payment.model.js";
+import User from "../models/user.model.js";
 import Order from "../models/order.model.js";
 import Product from "../models/product.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -185,4 +187,56 @@ export const getOrdersByUser = asyncHandler(async (req, res) => {
       "User orders fetched successfully"
     )
   );
+});
+/* ---------------------------- GET ALL CUSTOMERS (ADMIN) ---------------------------- */
+export const getAllCustomers = asyncHandler(async (req, res) => {
+  // Step 1: Aggregate total spent per user from Payment collection
+  const paymentsData = await Payment.aggregate([
+    { $match: { status: "succeeded" } },
+    {
+      $group: {
+        _id: "$userId",
+        totalSpent: { $sum: "$amount" },
+      },
+    },
+  ]);
+
+  // Step 2: Aggregate total paid orders per user from Order collection
+  const ordersData = await Order.aggregate([
+    { $match: { paymentStatus: "Paid" } },
+    {
+      $group: {
+        _id: "$userId",
+        totalOrders: { $sum: 1 },
+      },
+    },
+  ]);
+
+  // Step 3: Merge the two datasets manually (since Mongoose can’t do multi-collection aggregation easily)
+  const combinedData = await Promise.all(
+    paymentsData.map(async (payment) => {
+      const orderInfo = ordersData.find(
+        (order) => order._id.toString() === payment._id.toString()
+      );
+      const user = await User.findById(payment._id).select(
+        "firstName lastName email"
+      );
+
+      return {
+        userId: user?._id,
+        firstName: user?.firstName,
+        lastName: user?.lastName,
+        email: user?.email,
+        totalOrders: orderInfo ? orderInfo.totalOrders : 0,
+        totalSpent: payment.totalSpent || 0,
+      };
+    })
+  );
+
+  // Step 4: Sort by total spent (descending)
+  combinedData.sort((a, b) => b.totalSpent - a.totalSpent);
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, combinedData, "Customers fetched successfully"));
 });

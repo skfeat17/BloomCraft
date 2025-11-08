@@ -7,6 +7,7 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  getAllCustomers,
 } from "../controllers/admin.controller.js";
 import { authenticate } from "../middlewares/authenticate.middleware.js";
 import { adminAuth } from "../middlewares/checkAdmin.middleware.js";
@@ -16,7 +17,6 @@ const router = express.Router();
 // ⚡ All routes are protected and only for Admin
 router.use(authenticate);
 router.use(adminAuth);
-//TODO: MAKE ROUTES ON POST MAN FOR THEM
 // ------------------------ ORDERS ------------------------
 
 // Update order status
@@ -41,5 +41,8 @@ router.put("/product/update/:id",  upload.array("images", 5), updateProduct);
 
 // Delete a product
 router.delete("/product/delete/:id", deleteProduct);
+
+//--------------------------Customer ROUTES--------------------------
+router.get("/customers", getAllCustomers);
 
 export default router;
