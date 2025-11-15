@@ -1,8 +1,12 @@
+import crypto from "crypto";
+import { VerificationToken } from "../models/verification.model.js";
 import User from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { sendEmail } from "../utils/nodemailer.js";
+import { sendVerificationEmail } from "../utils/SendVerificationEmail.js";
+
 import OTP from "../models/otp.model.js";
 const httpOptions = {
   httpOnly: true,
@@ -11,24 +15,47 @@ const httpOptions = {
 //REGISTER A USER
 export const registerUser = asyncHandler(async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
+
   if (!firstName || !lastName || !email || !password) {
     throw new ApiError(403, "All Fields are required");
   }
+
   const existingUSer = await User.findOne({ email });
-  if (!!existingUSer) {
+  if (existingUSer) {
     throw new ApiError(403, "Email already exists");
   }
+
   const user = await User.create({
     firstName: firstName.trim(),
     lastName: lastName.trim(),
     email: email.trim().toLowerCase(),
     password,
   });
+
   if (!user) {
     throw new ApiError(500, "Something went wrong while creating the user");
   }
+
+  // ✅ Generate token for email verification
+  const token = crypto.randomBytes(32).toString("hex");
+
+  await VerificationToken.create({
+    userId: user._id,
+    token,
+  });
+
+  // ✅ verification link
+  const verifyURL = `${process.env.BACKEND_URL}/api/auth/verify-email/${token}`;
+
+  await sendVerificationEmail({
+    to: user.email,
+    name: user.firstName,
+    verifyURL
+  });
+
   const accessToken = user.generateAccessToken();
   const createdUser = await User.findById(user._id).select("-password");
+
   res
     .cookie("accessToken", accessToken, httpOptions)
     .status(201)
@@ -36,10 +63,11 @@ export const registerUser = asyncHandler(async (req, res) => {
       new ApiResponse(
         201,
         { user: createdUser, accessToken },
-        "User Created Successfully"
+        "User Created Successfully. Please check your email to verify your account."
       )
     );
 });
+
 // LOGIN A USER
 export const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
@@ -191,3 +219,46 @@ export const changePassword = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, null, "Password changed successfully"));
 });
 
+export const verifyEmailLink = asyncHandler(async (req, res) => {
+  const { token } = req.params;
+
+  const record = await VerificationToken.findOne({ token });
+
+  if (!record) {
+    return res.send(`
+      <html>
+        <body style="font-family: sans-serif; text-align: center; padding: 50px;">
+          <h1 style="color: red;">Invalid verification link</h1>
+        </body>
+      </html>
+    `);
+  }
+
+  const user = await User.findById(record.userId);
+
+  if (!user) {
+    return res.send(`
+      <html>
+        <body style="font-family: sans-serif; text-align: center; padding: 50px;">
+          <h1 style="color: red;">User not found</h1>
+        </body>
+      </html>
+    `);
+  }
+
+  // ✅ Mark verified
+  user.verified = true;
+  await user.save();
+
+  // ✅ Delete token so link can't be reused
+  await VerificationToken.findByIdAndDelete(record._id);
+
+  return res.send(`
+    <html>
+      <body style="font-family: sans-serif; text-align: center; padding: 50px;">
+        <h1 style="color: #4F8C71;">✅ Email Verified Successfully</h1>
+        <p>You can now close this page and log in.</p>
+      </body>
+    </html>
+  `);
+});
