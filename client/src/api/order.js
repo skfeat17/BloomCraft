@@ -1,17 +1,19 @@
 import { apiRequestHandler } from "./api.js";
 
-export async function getAllOrdersHandler() {
+export async function getAllOrdersHandler(token = localStorage.getItem("accessToken") || null) {
   return await apiRequestHandler(
     "/order/all",
     "GET",
-    null
+    null,
+    token
   );
 }
-export async function getSingleOrderHandler(orderId) {
+export async function getSingleOrderHandler(orderId,token = localStorage.getItem("accessToken") || null) {
   return await apiRequestHandler(
     `/order/${orderId}`,
     "GET",
-    null
+    null,
+    token
   );
 }
 
