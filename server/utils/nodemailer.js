@@ -1,10 +1,16 @@
 import nodemailer from "nodemailer";
 import ejs from "ejs";
 import path from "path";
+import { fileURLToPath } from "url";
+
+// Get directory of this file (ESM compatible)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export async function sendEmail({ to, name, otp }) {
-  // Compile template
-  const templatePath = path.join(process.cwd(),"utils","otp-template.ejs");
+  // ✅ Safe absolute path (works on Vercel and locally)
+  const templatePath = path.resolve(__dirname, "utils", "otp-template.ejs");
+
   const htmlContent = await ejs.renderFile(templatePath, {
     name,
     OTP: otp,
