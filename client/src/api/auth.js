@@ -50,3 +50,11 @@ export async function verifyEmailHandler(otp, token = localStorage.getItem("acce
     token
   );
 }
+
+export async function resetPasswordHandler(email,otp, newPassword) {
+  return await apiRequestHandler(
+    "/auth/reset-password",
+    "POST",
+    {email, otp, newPassword }
+  );
+}

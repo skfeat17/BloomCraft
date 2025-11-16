@@ -47,35 +47,34 @@ export default function ProductCard({ item }) {
           />
         </div>
       </Link>
-
       {/* Content */}
       <div className="p-4 flex flex-col flex-1">
-        {/* Title */}
-        <Link
-          to={`/product/${item._id}`}
-          className="text-lg font-semibold hover:text-[#4F8C71] transition line-clamp-1"
-        >
-          {item.title}
+        <Link to={`/product/${item._id}`}>
+          {/* Title */}
+          <p
+
+            className="text-lg font-semibold hover:text-[#4F8C71] transition line-clamp-1"
+          >
+            {item.title}
+          </p>
+
+          {/* Description */}
+          <p className="text-gray-600 text-sm mt-1 line-clamp-2 min-h-[42px]">
+            {item.description}
+          </p>
+
+          {/* Price */}
+          <p className="text-xl font-semibold mt-3">RM {item.price}</p>
         </Link>
-
-        {/* Description */}
-        <p className="text-gray-600 text-sm mt-1 line-clamp-2 min-h-[42px]">
-          {item.description}
-        </p>
-
-        {/* Price */}
-        <p className="text-xl font-semibold mt-3">RM {item.price}</p>
-
         {/* Add to Cart */}
         <div className="mt-auto">
           <button
             onClick={handleAddToCart}
             disabled={isInCart || added}
-            className={`cursor-pointer w-full mt-4 flex items-center justify-center gap-2 py-2 rounded-full transition ${
-              isInCart || added
-                ? "text-white"
-                : "bg-[#f7dbe7] hover:bg-[#f3cadd] text-gray-800"
-            }`}
+            className={`cursor-pointer w-full mt-4 flex items-center justify-center gap-2 py-2 rounded-full transition ${isInCart || added
+              ? "text-white"
+              : "bg-[#f7dbe7] hover:bg-[#f3cadd] text-gray-800"
+              }`}
             style={{
               backgroundColor: isInCart || added ? "#4F8C71" : undefined,
             }}
@@ -94,6 +93,6 @@ export default function ProductCard({ item }) {
           </button>
         </div>
       </div>
-    </div>
+    </div >
   );
 }

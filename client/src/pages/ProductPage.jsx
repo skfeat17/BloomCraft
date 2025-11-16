@@ -1,25 +1,28 @@
-import { useParams, Link } from "react-router-dom";
-import { ShoppingCart } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { ShoppingCart, Check, ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useProducts } from "../context/ProductContext.jsx";
+import { useCart } from "../context/CartContext.jsx";
 
 export default function ProductPage() {
   const { fetchSingleProduct, products, loading: globalLoading } = useProducts();
-
+  const { addToCart, cartItems } = useCart();
   const { id } = useParams();
+  const navigate = useNavigate(); // ✅ for Back button
 
   const [product, setProduct] = useState(null);
   const [found, setFound] = useState(true);
   const [loading, setLoading] = useState(true);
   const [selectedImg, setSelectedImg] = useState("");
   const [recommended, setRecommended] = useState([]);
+  const [added, setAdded] = useState(false);
 
   // ✅ Fetch main product
   useEffect(() => {
     (async () => {
       setLoading(true);
-
       const res = await fetchSingleProduct(id);
+
       if (res?.ok) {
         setProduct(res.data);
         setSelectedImg(res.data.images[0]);
@@ -32,27 +35,27 @@ export default function ProductPage() {
     })();
   }, [id]);
 
-  // ✅ Fetch Recommended (3 random items)
+  // ✅ Fetch Recommended
   useEffect(() => {
-    if (!products || products.length === 0) return;
-    if (!product) return;
+    if (!products || !products.length || !product) return;
 
-    // filter out current product
     const others = products.filter((p) => p._id !== product._id);
-
-    // random shuffle
     const shuffled = others.sort(() => 0.5 - Math.random());
-
-    // pick top 3
     setRecommended(shuffled.slice(0, 3));
   }, [product, products]);
+
+  // ✅ Detect if product is already in cart
+  useEffect(() => {
+    const inCart = cartItems.some((item) => item._id === id);
+    setAdded(inCart);
+  }, [cartItems, id]);
 
   // ✅ Skeleton Loader
   if (loading) {
     return (
       <section className="max-w-6xl mx-auto px-6 py-10 animate-pulse">
+        <div className="h-10 w-28 bg-gray-300 rounded mb-6"></div>
         <div className="grid md:grid-cols-2 gap-12">
-
           <div>
             <div className="bg-gray-300 h-[420px] w-full rounded-xl"></div>
             <div className="flex gap-4 mt-4">
@@ -69,7 +72,6 @@ export default function ProductPage() {
             <div className="h-5 bg-gray-300 w-5/6 rounded mb-6"></div>
             <div className="h-12 bg-gray-300 rounded-full w-full"></div>
           </div>
-
         </div>
       </section>
     );
@@ -87,13 +89,20 @@ export default function ProductPage() {
     );
   }
 
+  // ✅ Main UI
   return (
     <section className="max-w-6xl mx-auto px-6 py-10">
+      {/* 🔙 Back Button at Top */}
+      <button
+        onClick={() => navigate(-1)}
+        className="mb-8 flex items-center gap-2 text-[#4F8C71] hover:text-[#3e6f59] transition font-medium"
+      >
+        <ArrowLeft size={20} />
+        <span>Back</span>
+      </button>
 
-      {/* MAIN PRODUCT */}
       <div className="grid md:grid-cols-2 gap-12">
-
-        {/* Left: Images */}
+        {/* 🖼️ Product Images */}
         <div>
           <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
             <img
@@ -103,7 +112,6 @@ export default function ProductPage() {
             />
           </div>
 
-          {/* Thumbnails */}
           <div className="flex gap-4 mt-4">
             {product.images?.map((img, index) => (
               <img
@@ -117,7 +125,7 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* Right: Details */}
+        {/* 🧾 Product Details */}
         <div className="flex flex-col">
           <h1 className="text-3xl font-semibold text-gray-800">{product.title}</h1>
 
@@ -129,9 +137,24 @@ export default function ProductPage() {
             {product.description}
           </p>
 
-          <button className="mt-8 flex items-center justify-center gap-2 bg-[#f7dbe7] hover:bg-[#f3cadd] text-gray-800 py-3 rounded-full transition font-medium">
-            <ShoppingCart size={20} />
-            <span>Add to Cart</span>
+          {/* ✅ Add to Cart Button */}
+          <button
+            onClick={() => {
+              if (!added) {
+                addToCart(product);
+                setAdded(true);
+              }
+            }}
+            disabled={added}
+            className={`mt-8 flex items-center justify-center gap-2 py-3 rounded-full transition font-medium
+              ${
+                added
+                  ? "bg-[#4F8C71] text-white cursor-default"
+                  : "bg-[#f7dbe7] hover:bg-[#f3cadd] text-gray-800"
+              }`}
+          >
+            {added ? <Check size={20} /> : <ShoppingCart size={20} />}
+            <span>{added ? "Added to Cart" : "Add to Cart"}</span>
           </button>
 
           <Link
@@ -141,10 +164,9 @@ export default function ProductPage() {
             Back to Shop
           </Link>
         </div>
-
       </div>
 
-      {/* ✅ RECOMMENDED SECTION */}
+      {/* 🛍️ Recommended Section */}
       <div className="mt-16">
         <h2 className="text-2xl font-semibold mb-6">You may also like</h2>
 
@@ -167,22 +189,20 @@ export default function ProductPage() {
                   alt={item.title}
                   className="w-full h-48 object-cover rounded-lg"
                 />
-
                 <h3 className="mt-4 font-semibold text-gray-800 line-clamp-1">
                   {item.title}
                 </h3>
-
                 <p className="text-gray-600 mt-1 text-sm line-clamp-2">
                   {item.description}
                 </p>
-
-                <p className="mt-2 font-semibold text-gray-700">RM {item.price}</p>
+                <p className="mt-2 font-semibold text-gray-700">
+                  RM {item.price}
+                </p>
               </Link>
             ))}
           </div>
         )}
       </div>
-
     </section>
   );
 }

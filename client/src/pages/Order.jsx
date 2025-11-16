@@ -2,8 +2,9 @@ import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { MessageCircle, Truck, ArrowLeft, Check, ArrowRight } from "lucide-react";
 import { getSingleOrderHandler } from "../api/order";
-
+import { phone } from "../utils/WhatsAppContact";
 export default function OrderDetailsPage() {
+
     const { id } = useParams();
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -91,11 +92,24 @@ export default function OrderDetailsPage() {
                 </span>
             </div>
 {/* SUCCESS ALERT */}
-{order.paymentStatus === "Paid" && (
+{order.paymentStatus === "Paid" && order.orderStatus==="Ordered"&& (
     <div className="mb-6 p-4 rounded-lg bg-green-100 border border-green-400 text-green-700 font-medium text-center">
         ✅ Payment received! Your order is confirmed.  
         We are currently crafting your order.
     </div>
+)}
+{order.orderStatus === "Shipped" && (
+  <div className="mb-6 p-4 rounded-lg bg-green-100 border border-green-400 text-green-700 font-medium text-center">
+      🚚 Great news! Your order has been shipped.  
+      It’s on its way and will reach you soon.
+  </div>
+)}
+
+{order.orderStatus === "Delivered" && (
+  <div className="mb-6 p-4 rounded-lg bg-blue-100 border border-blue-400 text-blue-700 font-medium text-center">
+      🎉 Your order has been delivered!  
+      We hope you love your purchase. Thank you for choosing us!
+  </div>
 )}
 
 
@@ -201,7 +215,7 @@ export default function OrderDetailsPage() {
             {/* WhatsApp CTA */}
             {order.orderStatus === "Processing" && (
                 <a
-                    href={`https://wa.me/60123456789?text=${whatsappMessage}`}
+                    href={`https://wa.me/${phone}?text=${whatsappMessage}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mt-10 w-full md:w-auto py-3 px-6 flex items-center justify-center gap-2 rounded-full bg-[#4F8C71] text-white font-medium hover:opacity-90 transition mx-auto block"

@@ -1,6 +1,6 @@
 import { CheckCircle2, MessageCircle } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-
+import { phone } from "../utils/WhatsAppContact";
 export default function OrderSuccessPage() {
     const { id } = useParams(); // get order ID from URL
 
@@ -41,10 +41,10 @@ export default function OrderSuccessPage() {
 
                 {/* ✅ Confirm Order on WhatsApp Button */}
                   <Link
-                    to={`/orders/${id}`}
+                    to={`/order/${id}`}
                     className="w-full py-3 rounded-full bg-[#4F8C71] text-white font-medium hover:opacity-90 transition"
                 >
-                    Go to Orders to Confirm
+                   View Order Details
                 </Link>
 
                 {/* Continue Shopping */}
@@ -56,12 +56,6 @@ export default function OrderSuccessPage() {
                 </Link>
 
                 {/* View Order */}
-                <Link
-                    to={`/order/${id}`}
-                    className="w-full py-3 rounded-full bg-[#f7dbe7] text-gray-800 font-medium hover:bg-[#f3cadd] transition"
-                >
-                    View Your Order
-                </Link>
 
             </div>
         </section>

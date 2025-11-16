@@ -1,4 +1,8 @@
-const api = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+// api.js
+const isProd = import.meta.env.MODE === "production";
+
+// ✅ Use relative path on production (for Vercel serverless)
+export const api = isProd ? "" : "http://localhost:8000/api";
 
 class ApiResponse {
   constructor(res, data) {
@@ -9,9 +13,9 @@ class ApiResponse {
   }
 }
 
-// ✅ Global delay toggle (set to true to simulate slow network)
-const ENABLE_DELAY = true;
-const DELAY_MS = 1200; // 1.2 seconds
+// ✅ Simulated network delay (optional)
+const ENABLE_DELAY = false;
+const DELAY_MS = 1200;
 
 export async function apiRequestHandler(
   endpoint,
@@ -19,7 +23,6 @@ export async function apiRequestHandler(
   body = null,
   token = null
 ) {
-  // ✅ Artificial delay
   if (ENABLE_DELAY) {
     await new Promise((resolve) => setTimeout(resolve, DELAY_MS));
   }
@@ -36,7 +39,13 @@ export async function apiRequestHandler(
     ...(body && { body: JSON.stringify(body) }),
   });
 
-  const data = await res.json();
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    data = { message: "Invalid JSON response" };
+  }
+
   console.log(`API Request to ${endpoint} Response:`, data);
 
   return new ApiResponse(res, data);

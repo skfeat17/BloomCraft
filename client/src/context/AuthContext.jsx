@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import {getCurrentUserHandler, loginHandler,logoutHandler,registerHandler,sendOtpHandler,verifyEmailHandler} from '../api/auth'
+import {getCurrentUserHandler, loginHandler,logoutHandler,registerHandler,sendOtpHandler,verifyEmailHandler,resetPasswordHandler} from '../api/auth'
 // 1️⃣ Create context
 export const AuthContext = createContext();
 
@@ -11,6 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState(localStorage.getItem("accessToken")||null);
   const [isAuthenticated, setIsAuthenticated] = useState(!!token);
+  const [email,setEmail]=useState("");
   // If token exists, mark user as authenticated
   useEffect(() => {
     setIsAuthenticated(!!user || !!token);
@@ -73,6 +74,7 @@ const currentUser = async () => {
 
 const sendOtp = async (email) => {
     setLoading(true);
+    setEmail(email);
     const data = await sendOtpHandler(email);
     setLoading(false);
     return data;
@@ -85,6 +87,12 @@ const verifyEmail = async (otp) => {
   }
 
 
+const resetPassword = async (otp, newPassword) => {
+    setLoading(true);
+    const data = await resetPasswordHandler(email,otp, newPassword);
+    setLoading(false);
+    return data;
+  }
 
 
 
@@ -103,6 +111,7 @@ const verifyEmail = async (otp) => {
         currentUser,
         sendOtp,
         verifyEmail,
+        resetPassword,
         isError
       }}
     >

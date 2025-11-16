@@ -6,12 +6,16 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { useShipping } from "../context/ShippingContext.jsx";
 import { useCart } from "../context/CartContext.jsx";     // ⭐ IMPORT CART CONTEXT
 import { createOrderHandler } from "../api/order.js";
+import { toast } from "react-hot-toast";
+import { phone } from "../utils/WhatsAppContact.js";
 
 export default function CheckoutPage() {
+  console.log("CheckoutPage rendered PHONE:", phone);
   const [loading, setLoading] = useState(false);
+  const [orderId, setOrderId] = useState(null);
   const { user } = useAuth();
   const { shipping } = useShipping();
-  const { cartItems } = useCart();                         // ⭐ REAL CART ITEMS
+  const { cartItems,clearCart } = useCart();                         // ⭐ REAL CART ITEMS
   const userId = user?._id;
   
   const total = cartItems.reduce((sum, item) => sum + item.price, 0);
@@ -31,7 +35,11 @@ export default function CheckoutPage() {
       const response = await createOrderHandler(orderData);
       setLoading(false);
       console.log("Order Created:", response);
-      setOpen(true);
+      toast.success("Order placed successfully!");
+      setTimeout(() => {
+        setOpen(true);
+      }, 1000);
+      setOrderId(response.data._id);
     } catch (error) {
       console.error("Error creating order:", error);
       alert("Failed to create order. Please try again.");
@@ -131,7 +139,10 @@ export default function CheckoutPage() {
       </section>
 
       {/* POPUP MODAL */}
-      <PopupModal open={open} onClose={() => setOpen(false)}>
+      <PopupModal open={open} onClose={() => {setOpen(false)
+        clearCart();
+        navigate(`/order/${orderId}`);
+      }}>
         <h2 className="text-2xl font-semibold text-gray-800 mb-3 text-center">
           Confirm Your Order
         </h2>
@@ -142,10 +153,10 @@ export default function CheckoutPage() {
         </p>
 
         <a
-          href={`https://wa.me/60123456789?text=${whatsappMessage}`}
+          href={`https://wa.me/${phone}?text=${whatsappMessage}`}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() => navigate("/order-success/12345")}
+          onClick={() => navigate(`/order-success/${orderId}`)}
           className="flex items-center justify-center gap-2 mt-6 w-full py-3 rounded-full bg-[#4F8C71] text-white font-medium hover:opacity-90 text-center transition"
         >
           <MessageCircle size={20} />

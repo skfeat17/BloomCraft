@@ -2,16 +2,21 @@
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import toast from "react-hot-toast";
 export default function ForgotPassword() {
+  const { loading, sendOtp } = useAuth();
   const { register, handleSubmit } = useForm();
   const navigate = useNavigate();
-  const onSubmit = (data) => {
-    console.log("Reset request for:", data.email);
-    // TODO: API call → /auth/send-reset
-    setTimeout(() => {
+  const onSubmit = async(data) => {
+    const res = await sendOtp(data.email);
+    if (res?.ok) {
+      toast.success("OTP sent to your email!");
       navigate("/reset-password");
-      
-    }, 500);
+    } else {
+      toast.error(res?.message || "Failed to send OTP. Please try again.");
+      return;
+    }
   };
 
   return (
@@ -42,9 +47,10 @@ export default function ForgotPassword() {
 
         <button
           type="submit"
+          disabled={loading}
           className="w-full py-3 rounded-full bg-[#4F8C71] text-white font-medium hover:opacity-90 transition"
         >
-          Send Reset OTP
+          {loading ? "Sending OTP..." : "Send OTP"}
         </button>
       </form>
 
