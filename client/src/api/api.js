@@ -1,8 +1,8 @@
 // api.js
-const isProd = import.meta.env.MODE === "production";
+
 
 // ✅ Use relative path on production (for Vercel serverless)
-export const api = isProd ? "" : "http://localhost:8000/api";
+export const api = "https://shicraft-backend.vercel.app/api";
 
 class ApiResponse {
   constructor(res, data) {
@@ -15,7 +15,7 @@ class ApiResponse {
 
 // ✅ Simulated network delay (optional)
 const ENABLE_DELAY = false;
-const DELAY_MS = 1200;
+const DELAY_MS = 0;
 
 export async function apiRequestHandler(
   endpoint,
