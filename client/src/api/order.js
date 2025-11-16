@@ -15,10 +15,11 @@ export async function getSingleOrderHandler(orderId) {
   );
 }
 
-export async function createOrderHandler(orderData) {
+export async function createOrderHandler(orderData,token = localStorage.getItem("accessToken") || null) {
   return await apiRequestHandler(
     "/order/create",
     "POST",
-    orderData
+    orderData,
+    token
   );
 }
