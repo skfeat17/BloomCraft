@@ -91,11 +91,11 @@ export default function AccountDashboard() {
 
                                 {user.verified ? (
                                     <span className="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 flex items-center gap-1">
-                                        ✓ Verified
+                                        ✓ 
                                     </span>
                                 ) : (
                                     <span className="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-600 flex items-center gap-1">
-                                        ✕ Not Verified
+                                        ✕ 
                                     </span>
                                 )}
                             </div>
